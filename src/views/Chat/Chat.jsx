@@ -2,9 +2,9 @@ import { useEffect, useRef } from "react";
 import { Card, CardContent, Typography, Button, Box } from "@mui/material";
 import { LanguageSelect } from "../../components/LanguageSelect/LanguageSelect";
 const API_URL = import.meta.env.VITE_API_URL;
+
 // eslint-disable-next-line react/prop-types
 export const Chat = ({ lang, onLangChange }) => {
-
   const recognition = useRef(null);
   const chatDiv = useRef(null);
 
@@ -67,7 +67,14 @@ export const Chat = ({ lang, onLangChange }) => {
           mb: 2,
         }}
       >
-        <LanguageSelect lang={lang} onChange={onLangChange} sx={{ minWidth: 180 }} />
+        <LanguageSelect
+          lang={lang}
+          onChange={(value) => {
+            console.log('Idioma seleccionado:', value);
+            onLangChange(value);
+          }}
+          sx={{ minWidth: 180 }}
+        />
         <Typography variant="h5" component="h1">
           Chat con voz
         </Typography>

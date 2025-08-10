@@ -3,7 +3,7 @@ import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
 export const LanguageSelect = ({ lang, onChange }) => {
   return (
-    <FormControl  variant="standard" sx={{ m: 1, minWidth: 120 }}>
+    <FormControl  variant="outlined" sx={{ m: 1, minWidth: 120 }}>
       <InputLabel id="language-select-label">Idioma</InputLabel>
       <Select
         labelId="language-select-label"
