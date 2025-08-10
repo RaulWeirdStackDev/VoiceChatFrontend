@@ -18,7 +18,7 @@ export const Chat = ({ lang, onLangChange }) => {
         chatDiv.current.innerHTML += `<p><b>Tú:</b> ${transcript}</p>`;
       }
 
-      const res = await fetch('http://localhost:3000/api/chat', {
+      const res = await fetch('https://voicechatbackend-01pz.onrender.com/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: transcript }),
