@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Card, CardContent, Typography, Button, Box } from "@mui/material";
 import { LanguageSelect } from "../../components/LanguageSelect/LanguageSelect";
-
+const API_URL = import.meta.env.VITE_API_URL;
 // eslint-disable-next-line react/prop-types
 export const Chat = ({ lang, onLangChange }) => {
-  const API_URL = import.meta.env.VITE_API_URL;
+
   const recognition = useRef(null);
   const chatDiv = useRef(null);
 
