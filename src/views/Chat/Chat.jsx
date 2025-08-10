@@ -4,6 +4,7 @@ import { LanguageSelect } from "../../components/LanguageSelect/LanguageSelect";
 
 // eslint-disable-next-line react/prop-types
 export const Chat = ({ lang, onLangChange }) => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const recognition = useRef(null);
   const chatDiv = useRef(null);
 
@@ -18,7 +19,7 @@ export const Chat = ({ lang, onLangChange }) => {
         chatDiv.current.innerHTML += `<p><b>Tú:</b> ${transcript}</p>`;
       }
 
-      const res = await fetch('https://voicechatbackend-01pz.onrender.com/api/chat', {
+      const res = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: transcript }),
