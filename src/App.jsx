@@ -33,7 +33,7 @@ const App = () => {
           p: 2,
         }}
       >
-        <Chat lang={lang} />
+<Chat lang={lang} onLangChange={setLang} />
       </Box>
 
       {/* Footer fijo abajo */}
