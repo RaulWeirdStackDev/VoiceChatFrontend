@@ -32,13 +32,13 @@ export const Chat = ({ lang, onLangChange }) => {
         chatDiv.current.innerHTML += `<p><b>Gemini:</b> ${data.reply}</p>`;
       }
 
-      setTimeout(() => {
+
         speechSynthesis.cancel();
         const cleanText = cleanTextForSpeech(data.reply);
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = lang;
         speechSynthesis.speak(utterance);
-      }, 100);
+     
     };
 
     recognition.current.onerror = (event) => {
