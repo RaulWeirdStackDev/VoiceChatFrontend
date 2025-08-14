@@ -17,7 +17,7 @@ export const Footer = () => {
         &copy; {new Date().getFullYear()} VoiceChat. 
                 Creado por{" "}
         <Link href="https://raul-rodriguez-c.vercel.app/" target="_blank" rel="noopener" color="inherit" underline="hover">
-          Raúl Rodríguez Clavero
+          Raúl Rodríguez
         </Link>
       </Typography>
 
