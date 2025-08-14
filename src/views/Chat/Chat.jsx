@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Card, CardContent, Typography, Button, Box } from "@mui/material";
 import { LanguageSelect } from "../../components/LanguageSelect/LanguageSelect";
-import {cleanTextForSpeech} from "../../utils/cleanTextForSpeech.js";
+import { cleanTextForSpeech } from "../../utils/cleanTextForSpeech.js";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -32,13 +32,12 @@ export const Chat = ({ lang, onLangChange }) => {
         chatDiv.current.innerHTML += `<p><b>Gemini:</b> ${data.reply}</p>`;
       }
 
-
-        speechSynthesis.cancel();
-        const cleanText = cleanTextForSpeech(data.reply);
-        const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.lang = lang;
-        speechSynthesis.speak(utterance);
-     
+      // Iniciar síntesis de voz
+      speechSynthesis.cancel();
+      const cleanText = cleanTextForSpeech(data.reply);
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = lang;
+      speechSynthesis.speak(utterance);
     };
 
     recognition.current.onerror = (event) => {
@@ -48,6 +47,10 @@ export const Chat = ({ lang, onLangChange }) => {
 
   const handleStart = () => {
     recognition.current?.start();
+  };
+
+  const handleStop = () => {
+    speechSynthesis.cancel(); // Detiene cualquier síntesis de voz en curso
   };
 
   return (
@@ -81,9 +84,14 @@ export const Chat = ({ lang, onLangChange }) => {
         <Typography variant="h5" component="h1">
           Chat con voz
         </Typography>
-        <Button variant="contained" onClick={handleStart}>
-          Hablar
-        </Button>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button variant="contained" onClick={handleStart}>
+            Hablar
+          </Button>
+          <Button variant="outlined" color="error" onClick={handleStop}>
+            Detener
+          </Button>
+        </Box>
       </CardContent>
 
       <Box
