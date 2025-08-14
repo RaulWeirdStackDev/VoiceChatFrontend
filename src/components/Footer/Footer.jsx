@@ -15,13 +15,12 @@ export const Footer = () => {
     >
       <Typography variant="body1">
         &copy; {new Date().getFullYear()} VoiceChat. 
-      </Typography>
-      <Typography variant="body2" sx={{ mt: 1 }}>
-        Creado por{" "}
+                Creado por{" "}
         <Link href="https://raul-rodriguez-c.vercel.app/" target="_blank" rel="noopener" color="inherit" underline="hover">
           Raúl Rodríguez Clavero
         </Link>
       </Typography>
+
     </Box>
   );
 };
