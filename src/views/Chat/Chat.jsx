@@ -3,6 +3,20 @@ import { Card, CardContent, Typography, Button, Box } from "@mui/material";
 import { LanguageSelect } from "../../components/LanguageSelect/LanguageSelect";
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Función para limpiar texto: quita negrita, cursiva, tachado y emojis
+function cleanTextForSpeech(text) {
+  let cleaned = text;
+  // Negrita y cursiva: **texto** o *texto*
+  cleaned = cleaned.replace(/(\*\*|\*)(.*?)\1/g, '$2');
+  // Tachado: ~~texto~~
+  cleaned = cleaned.replace(/~~(.*?)~~/g, '$1');
+  // Links: [texto](url)
+  cleaned = cleaned.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  // Quitar emojis (unicode)
+  cleaned = cleaned.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDDE0-\uDDFF]|\uD83D[\uDC00-\uDE4F]|\uD83D[\uDE80-\uDEFF])/g, '');
+  return cleaned;
+}
+
 // eslint-disable-next-line react/prop-types
 export const Chat = ({ lang, onLangChange }) => {
   const recognition = useRef(null);
@@ -32,7 +46,8 @@ export const Chat = ({ lang, onLangChange }) => {
 
       setTimeout(() => {
         speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(data.reply);
+        const cleanText = cleanTextForSpeech(data.reply);
+        const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = lang;
         speechSynthesis.speak(utterance);
       }, 100);
