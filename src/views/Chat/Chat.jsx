@@ -17,27 +17,50 @@ export const Chat = ({ lang, onLangChange }) => {
 
     recognition.current.onresult = async (event) => {
       const transcript = event.results[0][0].transcript;
+
       if (chatDiv.current) {
         chatDiv.current.innerHTML += `<p><b>Tú:</b> ${transcript}</p>`;
+        chatDiv.current.scrollTop = chatDiv.current.scrollHeight; // Scroll automático
       }
 
-      const res = await fetch(`${API_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: transcript }),
-      });
-      const data = await res.json();
+      // Prompt reforzado: máximo 100 palabras, claro y directo
+      const prompt = `
+Eres Gemini, un asistente conversacional.
+Responde exactamente a lo que el usuario pide en máximo 100 palabras.
+- Sé claro, directo y conciso.
+- No agregues información extra ni comentarios personales.
+- Mantén coherencia y buena gramática.
+- Termina la respuesta siempre con una oración completa.
+Usuario: "${transcript}"
+Respuesta:
+      `;
 
-      if (chatDiv.current) {
-        chatDiv.current.innerHTML += `<p><b>Gemini:</b> ${data.reply}</p>`;
+      try {
+        const res = await fetch(`${API_URL}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: prompt }),
+        });
+        const data = await res.json();
+
+        if (chatDiv.current) {
+          chatDiv.current.innerHTML += `<p><b>Gemini:</b> ${data.reply}</p>`;
+          chatDiv.current.scrollTop = chatDiv.current.scrollHeight;
+        }
+
+        // Síntesis de voz
+        speechSynthesis.cancel();
+        const cleanText = cleanTextForSpeech(data.reply);
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = lang;
+        speechSynthesis.speak(utterance);
+
+      } catch (err) {
+        console.error("Error al contactar Gemini:", err);
+        if (chatDiv.current) {
+          chatDiv.current.innerHTML += `<p style="color:red;"><b>Error:</b> No se pudo obtener respuesta de Gemini.</p>`;
+        }
       }
-
-      // Iniciar síntesis de voz
-      speechSynthesis.cancel();
-      const cleanText = cleanTextForSpeech(data.reply);
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = lang;
-      speechSynthesis.speak(utterance);
     };
 
     recognition.current.onerror = (event) => {
@@ -50,7 +73,7 @@ export const Chat = ({ lang, onLangChange }) => {
   };
 
   const handleStop = () => {
-    speechSynthesis.cancel(); // Detiene cualquier síntesis de voz en curso
+    speechSynthesis.cancel();
   };
 
   return (
