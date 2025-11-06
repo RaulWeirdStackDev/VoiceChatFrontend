@@ -83,71 +83,56 @@ export const Chat = ({ lang, onLangChange }) => {
     };
   }, []);
 
-  // Configurar reconocimiento de voz (solo una vez)
+  // Configurar reconocimiento de voz
   useEffect(() => {
-    if (!recognition.current) {
-      recognition.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.current.interimResults = false;
+    recognition.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.current.lang = lang;
+    recognition.current.interimResults = false;
 
-      recognition.current.onstart = () => {
-        setIsListening(true);
-        console.log('🎤 Escuchando...');
-      };
+    recognition.current.onstart = () => {
+      setIsListening(true);
+      console.log('🎤 Escuchando...');
+    };
 
-      recognition.current.onend = () => {
-        setIsListening(false);
-        console.log('🎤 Reconocimiento finalizado');
-      };
+    recognition.current.onend = () => {
+      setIsListening(false);
+      console.log('🎤 Reconocimiento finalizado');
+    };
 
-      recognition.current.onresult = async (event) => {
-        const transcript = event.results[0][0].transcript;
-        console.log('📝 Transcripción:', transcript);
+    recognition.current.onresult = async (event) => {
+      const transcript = event.results[0][0].transcript;
+      console.log('📝 Transcripción:', transcript);
 
+      if (chatDiv.current) {
+        chatDiv.current.innerHTML += `<p><b>Tú:</b> ${transcript}</p>`;
+        
+        // Crear elemento para respuesta de Gemini (se actualizará con streaming)
+        const geminiP = document.createElement('p');
+        geminiP.className = 'gemini-response';
+        geminiP.innerHTML = '<b>Gemini:</b> <i>Pensando...</i>';
+        chatDiv.current.appendChild(geminiP);
+        
+        chatDiv.current.scrollTop = chatDiv.current.scrollHeight;
+      }
+
+      // Enviar transcripción al servidor vía WebSocket
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.send(JSON.stringify({
+          transcript: transcript,
+          lang: lang
+        }));
+      } else {
+        console.error('❌ WebSocket no está conectado');
         if (chatDiv.current) {
-          chatDiv.current.innerHTML += `<p><b>Tú:</b> ${transcript}</p>`;
-          
-          // Crear elemento para respuesta de Gemini (se actualizará con streaming)
-          const geminiP = document.createElement('p');
-          geminiP.className = 'gemini-response';
-          geminiP.innerHTML = '<b>Gemini:</b> <i>Pensando...</i>';
-          chatDiv.current.appendChild(geminiP);
-          
-          chatDiv.current.scrollTop = chatDiv.current.scrollHeight;
+          chatDiv.current.innerHTML += `<p style="color:red;"><b>Error:</b> No hay conexión con el servidor.</p>`;
         }
-
-        // Enviar transcripción al servidor vía WebSocket
-        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-          ws.current.send(JSON.stringify({
-            transcript: transcript,
-            lang: lang
-          }));
-        } else {
-          console.error('❌ WebSocket no está conectado');
-          if (chatDiv.current) {
-            chatDiv.current.innerHTML += `<p style="color:red;"><b>Error:</b> No hay conexión con el servidor.</p>`;
-          }
-        }
-      };
-
-      recognition.current.onerror = (event) => {
-        console.error('Error en reconocimiento:', event.error);
-        setIsListening(false);
-      };
-    }
-
-    return () => {
-      if (recognition.current) {
-        recognition.current.abort();
       }
     };
-  }, [lang]);
 
-  // Actualizar idioma cuando cambia
-  useEffect(() => {
-    if (recognition.current) {
-      recognition.current.lang = lang;
-      console.log(`🌍 Idioma actualizado a: ${lang}`);
-    }
+    recognition.current.onerror = (event) => {
+      console.error('Error en reconocimiento:', event.error);
+      setIsListening(false);
+    };
   }, [lang]);
 
   const speakText = (text) => {
@@ -155,17 +140,6 @@ export const Chat = ({ lang, onLangChange }) => {
     const cleanText = cleanTextForSpeech(text);
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = lang;
-    
-    // Intentar encontrar una voz en el idioma seleccionado
-    const voices = speechSynthesis.getVoices();
-    const voice = voices.find(v => v.lang.startsWith(lang.split('-')[0]));
-    if (voice) {
-      utterance.voice = voice;
-      console.log(`🔊 Usando voz: ${voice.name} (${voice.lang})`);
-    } else {
-      console.warn(`⚠️ No se encontró voz para ${lang}, usando voz por defecto`);
-    }
-    
     currentUtterance.current = utterance;
     
     utterance.onend = () => {
